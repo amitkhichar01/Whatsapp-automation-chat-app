@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 
-export const registerUser = async (req, res) => {
+exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
@@ -30,7 +30,7 @@ export const registerUser = async (req, res) => {
     }
 };
 
-export const loginUser = async (req, res) => {
+exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -45,7 +45,7 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ message: "Invalid password" });
         }
 
-        const token = jwt.sign({ username: user.username }, "asdfghjklqwertyuii", { expiresIn: "1h" });
+        const token = jwt.sign({ username: user.username }, process.env.JWT_TOKEN, { expiresIn: "1h" });
 
         return res.status(200).json({ message: "user login successfully", email: user.email, token });
     } catch (error) {
