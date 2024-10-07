@@ -2,11 +2,22 @@ const { findUserByEmail } = require("../utilities/functions");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const registerSchema = require("./validations/users.validations");
 
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
+        const { error, value } = registerSchema.validate(req.body);
+
+        if (error) {
+            console.error("Validation failed:", error.details[0].message);
+            return res.status(400).json({ message: error.details[0].message });
+        } else {
+            console.log("Validation successful:", value);
+           
+        }
+
         //check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -23,7 +34,7 @@ exports.registerUser = async (req, res) => {
         });
 
         await newUser.save();
-        res.status(201).json({ message: "Registration successful." });
+        res.status(201).json({ message: "Registration successful.", value: value });
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({ message: "Error registering user" });
