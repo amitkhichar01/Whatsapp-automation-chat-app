@@ -1,8 +1,6 @@
-const User = require("../models/user");
+import User from "../models/user.js";
 
 //find a user by Email
-const findUserByEmail = async (email) => {
+export const findUserByEmail = async (email) => {
     return await User.findOne({ email }).exec();
 };
-
-module.exports = { findUserByEmail };

@@ -1,10 +1,10 @@
-const { findUserByEmail } = require("../utilities/functions");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const User = require("../models/user");
-const registerSchema = require("./validations/users.validations");
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import User from "../models/user.js";
+import registerSchema from "./validations/users.validations.js";
+import { findUserByEmail } from "../utilities/functions.js";
 
-exports.getUser = async (req, res) => {
+export const getUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -28,7 +28,7 @@ exports.getUser = async (req, res) => {
     }
 };
 
-exports.registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
     try {
         const { error, value } = registerSchema.validate(req.body);
 
@@ -61,7 +61,7 @@ exports.registerUser = async (req, res) => {
     }
 };
 
-exports.loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -85,7 +85,7 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         //check if user exists
         const existsUser = await findUserByEmail(req.body.email);
@@ -112,7 +112,7 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     const { email, password } = req.body;
 
     // Validate email and password presence

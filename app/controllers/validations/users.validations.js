@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 const registerSchema = Joi.object({
     first_name: Joi.string().trim().alphanum().min(3).max(30).required().messages({
@@ -43,4 +43,4 @@ const registerSchema = Joi.object({
     }),
 });
 
-module.exports = registerSchema;
+export default registerSchema;
