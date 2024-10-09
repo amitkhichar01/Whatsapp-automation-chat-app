@@ -2,7 +2,12 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import registerSchema from "./validations/users.validations.js";
-import { findUserByEmail } from "../utilities/functions.js";
+
+//find a user by Email
+const findUserByEmail = async (email) => {
+    return await User.findOne({ email }).exec();
+};
+
 
 export const getUser = async (req, res) => {
     const { email, password } = req.body;
@@ -12,19 +17,19 @@ export const getUser = async (req, res) => {
 
          // Check if user exists and verify password
          if (!user) {
-             return res.status(400).json({ message: "Invalid email" });
+             return res.status(400).json({ success: false, message: "Invalid email" });
          }
 
          if (!(await bcrypt.compare(password, user.password))) {
-             return res.status(400).json({ message: "Invalid password" });
+             return res.status(400).json({ success: false, message: "Invalid password" });
          }
 
-        return res.status(200).json({ message: "your details", user: user });
+        return res.status(200).json({ success: true, message: "your details", user: user });
 
 
     } catch (error) {
          console.log("get user error: ", error);
-         return res.status(500).json({ message: "get user error", error: error });
+         return res.status(500).json({ success: false, message: "get user error", error: error });
     }
 };
 
@@ -34,7 +39,7 @@ export const registerUser = async (req, res) => {
 
         if (error) {
             console.error("Validation failed:", error.details[0].message);
-            return res.status(400).json({ message: error.details[0].message });
+            return res.status(400).json({ success: false, message: error.details[0].message });
         } else {
             console.log("Validation successful:", value);
         }
@@ -42,7 +47,7 @@ export const registerUser = async (req, res) => {
         //check if user already exists
         const existingUser = await User.findOne({ email:req.body.email });
         if (existingUser) {
-            return res.status(400).json({ message: "Email already registered" });
+            return res.status(400).json({ success: false, message: "Email already registered" });
         }
 
         // Hash the password before saving
@@ -54,10 +59,10 @@ export const registerUser = async (req, res) => {
         });
 
         await newUser.save();
-        res.status(201).json({ message: "Registration successful.", value: value });
+        res.status(201).json({ success: true, message: "Registration successful.", value: value });
     } catch (error) {
         console.error("Registration error:", error);
-        res.status(500).json({ message: "Error registering user" });
+        res.status(500).json({ success: false, message: "Error registering user" });
     }
 };
 
@@ -69,19 +74,19 @@ export const loginUser = async (req, res) => {
 
         // Check if user exists and verify password
         if (!user) {
-            return res.status(400).json({ message: "Invalid email" });
+            return res.status(400).json({ success: false, message: "Invalid email" });
         }
 
         if (!(await bcrypt.compare(password, user.password))) {
-            return res.status(400).json({ message: "Invalid password" });
+            return res.status(400).json({ success: false, message: "Invalid password" });
         }
 
         const token = jwt.sign({ username: user.username }, process.env.JWT_TOKEN, { expiresIn: "1h" });
 
-        return res.status(200).json({ message: "user login successfully", email: user.email, token });
+        return res.status(200).json({ success: true, message: "user login successfully", email: user.email, token });
     } catch (error) {
         console.log("Login error: ", error);
-        return res.status(500).json({ message: "Error logging in" });
+        return res.status(500).json({ success: false, message: "Error logging in" });
     }
 };
 
@@ -90,14 +95,14 @@ export const updateUser = async (req, res) => {
         //check if user exists
         const existsUser = await findUserByEmail(req.body.email);
         if (!existsUser) {
-            return res.status(400).json({ message: "user not found" });
+            return res.status(400).json({ success: false, message: "user not found" });
         }
 
         const { error, value } = registerSchema.validate(req.body);
 
         if (error) {
             console.error("Validation failed:", error.details[0].message);
-            return res.status(400).json({ message: error.details[0].message });
+            return res.status(400).json({ success: false, message: error.details[0].message });
         } else {
             console.log("Validation successful:", value);
         }
@@ -105,10 +110,10 @@ export const updateUser = async (req, res) => {
 
         const findUser = await User.findOneAndUpdate({ email: req.body.email }, { ...req.body, password: hashedPassword }, { new: true });
         console.log(findUser);
-        return res.json({ message: "update user", user: findUser });
+        return res.json({ success: true, message: "update user", user: findUser });
     } catch (error) {
         console.error("updating error:", error);
-        res.status(500).json({ message: "Error when updating user" });
+        res.status(500).json({ success: false, message: "Error when updating user" });
     }
 };
 
@@ -117,7 +122,7 @@ export const deleteUser = async (req, res) => {
 
     // Validate email and password presence
     if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return res.status(400).json({ success: false, message: "Email and password are required" });
     }
 
     try {
@@ -125,26 +130,26 @@ export const deleteUser = async (req, res) => {
 
         // Check if user exists
         if (!user) {
-            return res.status(401).json({ message: "Invalid email" }); // Use 401 for unauthorized access
+            return res.status(401).json({ success: false, message: "Invalid email" }); // Use 401 for unauthorized access
         }
 
         // Check password validity
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid password" });
+            return res.status(401).json({ success: false, message: "Invalid password" });
         }
 
         // Delete user
         const deletedUser = await User.findOneAndDelete({ email });
         if (!deletedUser) {
-            return res.status(404).json({ message: "User not found or already deleted" });
+            return res.status(404).json({ success: false, message: "User not found or already deleted" });
         }
 
         console.log("Deleted user:", deletedUser);
 
-        return res.status(200).json({ message: "User deleted successfully", user: deletedUser });
+        return res.status(200).json({ success: true, message: "User deleted successfully", user: deletedUser });
     } catch (error) {
         console.error("Error deleting user:", error);
-        return res.status(500).json({ message: "An error occurred while deleting the user", error: error.message });
+        return res.status(500).json({ success: false, message: "An error occurred while deleting the user", error: error.message });
     }
 };
