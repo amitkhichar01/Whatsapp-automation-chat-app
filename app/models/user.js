@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import passportLocalMongoose from "passport-local-mongoose";
 
 // User Schema
 const userSchema = new mongoose.Schema(
@@ -28,16 +29,16 @@ const userSchema = new mongoose.Schema(
             lowercase: true,
             match: [/\S+@\S+\.\S+/, "Email must be valid"], // Basic email validation
         },
-        password: {
-            type: String,
-            required: [true, "Password is required"],
-            minlength: [8, "Password must be at least 8 characters long"],
-        },
     },
     {
         timestamps: true, // Automatically adds createdAt and updatedAt fields
     }
 );
+
+// Add passport-local-mongoose plugin to the user schema
+userSchema.plugin(passportLocalMongoose, {
+    usernameField: "email", // Use email as the username field
+});
 
 const User = mongoose.model("User", userSchema);
 
