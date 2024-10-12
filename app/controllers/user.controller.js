@@ -8,11 +8,11 @@ const findUserByEmail = async (email) => {
 };
 
 // Generate JWT token
-const generateToken = (email) => {
-     if (!process.env.JWT_TOKEN) {
-         throw new Error("Missing JWT_SECRET in environment variables");
-     }
-    return jwt.sign({ email }, process.env.JWT_TOKEN, { expiresIn: "1h" });
+const generateToken = (id) => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error("Missing JWT_SECRET in environment variables");
+    }
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
 // Get user details
@@ -67,9 +67,19 @@ export const registerUser = async (req, res) => {
 // Login user
 export const loginUser = async (req, res) => {
     try {
-        const { email } = req.body;
-        const token = generateToken(email);
-        return res.status(200).json({ success: true, message: "Login successful", token, user: req.user });
+        const token = generateToken(req.user.id);
+
+        // Log in the user and respond accordingly
+        req.login(req.user, (err) => {
+            if (err) return next(err);
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            user: req.user,
+        });
     } catch (error) {
         console.error("Login error:", error);
         return res.status(500).json({ success: false, message: "Error logging in", error: error.message });
