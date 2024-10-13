@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const whatsappConfigSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },

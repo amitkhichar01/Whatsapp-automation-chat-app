@@ -1,13 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
-import registerSchema from "./validations/users.validations.js";
+import registerSchema from "./validations/usersValidations.js";
 
-//find a user by Email
+// Helper function to find a user by email
 const findUserByEmail = async (email) => {
     return await User.findOne({ email }).exec();
 };
 
-// Generate JWT token
+// Helper function to generate JWT token
 const generateToken = (id) => {
     if (!process.env.JWT_SECRET) {
         throw new Error("Missing JWT_SECRET in environment variables");
@@ -17,7 +17,7 @@ const generateToken = (id) => {
 
 // Get user details
 export const getUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email } = req.body;
 
     try {
         const user = await findUserByEmail(email);
@@ -96,14 +96,14 @@ export const updateUser = async (req, res) => {
             return res.status(400).json({ success: false, message: error.details[0].message });
         }
 
-        const updatedUser = await User.findOneAndUpdate({ email: req.body.email }, value, { new: true });
+        const updatedUser = await User.findOneAndUpdate({ email: value.email }, value, { new: true });
 
         if (!updatedUser) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
         console.log(updatedUser);
-        return res.json({ success: true, message: "User updated successfully", user: updatedUser });
+        return res.status(200).json({ success: true, message: "User updated successfully", user: updatedUser });
     } catch (error) {
         console.error("updating error:", error);
         res.status(500).json({ success: false, message: "Error updating user", error: error.message });

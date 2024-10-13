@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
             required: [true, "Phone number is required"],
             trim: true,
             unique: true,
-            match: [/^\d{10}$/, "Phone number must be a valid 10-digit number"], // Basic phone validation (adjust as necessary)
+            match: [/^\d{10}$/, "Phone number must be a valid 10-digit number"], 
         },
         email: {
             type: String,
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
             trim: true,
             unique: true,
             lowercase: true,
-            match: [/\S+@\S+\.\S+/, "Email must be valid"], // Basic email validation
+            match: [/\S+@\S+\.\S+/, "Email must be valid"], 
         },
     },
     {
